@@ -15,7 +15,6 @@ type ErrorsMessage = {
 }
 
 type Video = {
-    id: Number;
     title: String;
     author: String;
     canBeDownloaded: Boolean;
@@ -27,25 +26,28 @@ type Video = {
 
 const data: Video[] = [];
 
-const isObject = (obj) => typeof obj === 'object' && !Array.isArray(obj) && obj!== null;
+const isObject = (obj: unknown) => typeof obj === 'object' && !Array.isArray(obj) && obj!== null;
 
 function validationError(field: string, message: string): ErrorsMessage {
     return { message, field }
 }
 
-function validate(data: unknown): ErrorsMessage[] {
+function validate(data: { [key: string]: unknown }): ErrorsMessage[] {
     const errorsMessages: ErrorsMessage[] = [];
-    if (!isObject(data)) {
+    if (!data || !isObject(data)) {
         errorsMessages.push(validationError("title", "Wrong title" ))
         errorsMessages.push(validationError("author", "Wrong author" ))
+        return errorsMessages;
     }
-    if (typeof data.title !== 'string') {
+    if (!data.hasOwnProperty('title')) {
+        errorsMessages.push(validationError("title", "Wrong title" ))
+    } else if (typeof data['title'] !== 'string') {
         errorsMessages.push(validationError("title", "Wrong title" ))
     }
     if (typeof data.author !== 'string') {
         errorsMessages.push(validationError("author", "Wrong author" ))
     }
-    if (data.availableResolutions && !Array.isArray(data.availableResolutions) || !data.availableResolutions.every(item => Object.keys(Resolution).includes(String(item)))) {
+    if (data.availableResolutions && (!Array.isArray(data.availableResolutions) || !data.availableResolutions.every((item: Resolution) => Object.keys(Resolution).includes(String(item))))) {
         errorsMessages.push(validationError("availableResolutions", "Wrong availableResolutions" ))
     }
 
@@ -83,19 +85,36 @@ app.post('/videos', (request: Request, response: Response) => {
 });
 
 app.get('/videos/:id', (request: Request, response: Response) => {
-    if (data[request.params.id]) {
+    if (data[Number(request.params.id)]) {
         response.send( {
             id: Number(request.params.id),
-            ...data[request.params.id],
+            ...data[Number(request.params.id)],
         });
     } else {
         response.sendStatus(404)
     }
 });
 
+app.put('/videos/:id', (request: Request, response: Response) => {
+    if (!data[Number(request.params.id)]) {
+        response.sendStatus(404);
+        return
+    }
+    const errorsMessages = validate(request.body);
+    if (errorsMessages.length > 0) {
+        response.status(400);
+        response.send({ errorsMessages });
+        return
+    }
+    for (const field in request.body) {
+        data[Number(request.params.id)][field as keyof Video] = request.body[field]
+    }
+    response.sendStatus(204);
+});
+
 app.delete('/videos/:id', (request: Request, response: Response) => {
-    if (data[request.params.id]) {
-        delete data[request.params.id]
+    if (data[Number(request.params.id)]) {
+        delete data[Number(request.params.id)]
         response.sendStatus(204)
     } else {
         response.sendStatus(404)
