@@ -39,12 +39,25 @@ function validate(data: { [key: string]: unknown }): ErrorsMessage[] {
         errorsMessages.push(validationError("author", "Wrong author" ))
         return errorsMessages;
     }
-    if (!data.hasOwnProperty('title')) {
-        errorsMessages.push(validationError("title", "Wrong title" ))
-    } else if (typeof data['title'] !== 'string') {
+    if (typeof data.title !== 'string') {
         errorsMessages.push(validationError("title", "Wrong title" ))
     }
     if (typeof data.author !== 'string') {
+        errorsMessages.push(validationError("author", "Wrong author" ))
+    }
+    if (data.availableResolutions && (!Array.isArray(data.availableResolutions) || !data.availableResolutions.every((item: Resolution) => Object.keys(Resolution).includes(String(item))))) {
+        errorsMessages.push(validationError("availableResolutions", "Wrong availableResolutions" ))
+    }
+
+    return errorsMessages;
+}
+
+function validateUpdate(data: { [key: string]: unknown }): ErrorsMessage[] {
+    const errorsMessages: ErrorsMessage[] = [];
+    if (data && isObject(data) && data.title && typeof data.title !== 'string') {
+        errorsMessages.push(validationError("title", "Wrong title" ))
+    }
+    if (data && isObject(data) && data.author && typeof data.author !== 'string') {
         errorsMessages.push(validationError("author", "Wrong author" ))
     }
     if (data.availableResolutions && (!Array.isArray(data.availableResolutions) || !data.availableResolutions.every((item: Resolution) => Object.keys(Resolution).includes(String(item))))) {
@@ -100,7 +113,7 @@ app.put('/videos/:id', (request: Request, response: Response) => {
         response.sendStatus(404);
         return
     }
-    const errorsMessages = validate(request.body);
+    const errorsMessages = validateUpdate(request.body);
     if (errorsMessages.length > 0) {
         response.status(400);
         response.send({ errorsMessages });
