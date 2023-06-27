@@ -76,9 +76,9 @@ app.post('/videos', (request: Request, response: Response) => {
         response.send({ errorsMessages });
     } else {
         const newVideo = {
-            ...request.body,
             id: +(new Date()),
-            createdAt: new Date()
+            createdAt: new Date(),
+            ...request.body,
         }
         data.push(newVideo);
         response.send(newVideo);
