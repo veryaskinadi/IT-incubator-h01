@@ -73,7 +73,7 @@ app.get('/videos', (request: Request, response: Response) => {
 app.post('/videos', (request: Request, response: Response) => {
     const errorsMessages = validate(request.body);
     if (errorsMessages.length > 0) {
-        response.send({ errorsMessages });
+        response.status(400).send({ errorsMessages });
     } else {
         const newVideo = {
             id: +(new Date()),
