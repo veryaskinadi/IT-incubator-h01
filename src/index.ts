@@ -67,7 +67,7 @@ app.delete('/testing/all-data', (request: Request, response: Response) => {
 });
 
 app.get('/videos', (request: Request, response: Response) => {
-    response.send(data);
+    response.status(200).send(data);
 });
 
 app.post('/videos', (request: Request, response: Response) => {
@@ -88,7 +88,7 @@ app.post('/videos', (request: Request, response: Response) => {
 app.get('/videos/:id', (request: Request, response: Response) => {
     const video = data.find((video: Video) => video.id === Number(request.params.id))
     if (video) {
-        response.send(video);
+        response.status(200).send(video);
     } else {
         response.sendStatus(404)
     }
