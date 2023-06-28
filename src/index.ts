@@ -75,13 +75,17 @@ app.post('/videos', (request: Request, response: Response) => {
     if (errorsMessages.length > 0) {
         response.status(400).send({ errorsMessages });
     } else {
+        const createdAt = new Date();
+        let publicationDate = new Date();
+        publicationDate.setDate(publicationDate.getDate() + 1);
         const newVideo = {
             id: +(new Date()),
-            createdAt: new Date(),
+            createdAt: createdAt.toISOString(),
+            publicationDate: publicationDate.toISOString(),
             ...request.body,
         }
         data.push(newVideo);
-        response.send(newVideo);
+        response.status(201).send(newVideo);
     }
 });
 
