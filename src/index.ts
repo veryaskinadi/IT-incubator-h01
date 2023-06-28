@@ -82,6 +82,8 @@ app.post('/videos', (request: Request, response: Response) => {
             id: +(new Date()),
             createdAt: createdAt.toISOString(),
             publicationDate: publicationDate.toISOString(),
+            canBeDownloaded: false,
+            minAgeRestriction: null,
             ...request.body,
         }
         data.push(newVideo);
